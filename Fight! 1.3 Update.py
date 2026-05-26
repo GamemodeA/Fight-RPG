@@ -449,7 +449,7 @@ while True:
         if game_start:
             break
         print("===========================")
-        print("   Welcome to Fight! (1.2) ")
+        print("   Welcome to Fight! (1.3) ")
         print("")
         print("        [   Play   ]       ")
         print("")
