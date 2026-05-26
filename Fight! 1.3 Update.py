@@ -1,20 +1,21 @@
 from time import sleep
 import random
 
-inventory = ["Apple", "Apple", "Apple"]
+inventory = ["Apple", "Apple"]
 user_hp = 100         #Default value is 100
 max_hp = user_hp      #Default value is user_hp
 enemy_hp = 200        #Default value is 200
 game_start = False    #Default value is False
 game_over = False     #Default value is False
-wait_time = 0.4       #Default value is 0.5
-txt_speed = 0.04      #Default value is 0.05
+wait_time = 0.5       #Default value is 0.4
+txt_speed = 0.05      #Default value is 0.04
 difficulty = "Normal" #Default value is "Normal"
 fast_mode = False     #Default value is False
-stock = 0             #Default value is 0
+confidence = 0        #Default value is 0
 tutorial_done = False #Default value is False
 hard_unlocked = False #Default value is False
 got_apple = False     #Default value is False
+enemy_turn = False    #Default value is False
 
 #The amount of time you wait between lines of text.
 if fast_mode:
@@ -23,15 +24,15 @@ if fast_mode:
 
 def wait():
     sleep(wait_time)
-
+    
 def border():
     print("---------------------------")
     wait()
 
 def new_menu():
-    for i in range(100):
+    for i in range(60):
         print("")
-
+    
 #Slowly types the words to make it look smoother and let the
 #reader read the text slower.
 def type_it(str):
@@ -45,13 +46,22 @@ def print_s(str):
         print(letter, end='', flush = True)
         sleep(txt_speed)
     print("")
+def print_d(str):
+    for letter in str:
+        print(letter, end='', flush = True)
+        sleep(txt_speed)
+def print_e(str):
+    for letter in str:
+        print(letter, end='', flush = True)
+        sleep(0.8)
+    print("")
 def voice(str):
     for letter in str:
         print(letter, end='', flush = True)
         sleep(0.1)
     print("")
     sleep(1)
-
+    
 #Checks if the player won or lost, then breaks the list if so.
 #Sets win value to true or false depending on health.
 
@@ -71,12 +81,12 @@ def check_win(player, enemy):
         return True
 
 #Checks if player can heal themself, then does so if can.
-def heal():
+def eat():
     global user_hp
     if user_hp < max_hp:
         try:
             inventory.pop()
-            heal_num = random.randint(50, 60)
+            heal_num = 30
             if user_hp + heal_num >= max_hp:
                 user_hp = max_hp
             else:
@@ -89,7 +99,24 @@ def heal():
             type_it("You have no Apples left!")
     else:
         type_it("You are already at full HP!")
-
+def heal():
+    global user_hp
+    global confidence
+    if user_hp < max_hp:
+        heal_num = random.randint(30, 50)
+        c_num = random.randint(3, 5)
+        if user_hp + heal_num >= max_hp:
+            user_hp = max_hp
+        else:
+            user_hp = user_hp + heal_num
+        type_it("You gather your confidence and...")
+        type_it("You are now at " + str(user_hp) + " HP!")
+        confidence -= c_num
+        if user_hp == max_hp:
+            type_it("Your HP is maxed out!")
+    else:
+        type_it("You are already at full HP!")
+    
 def get_apple():
     global user_hp
     global got_apple
@@ -102,7 +129,7 @@ def get_apple():
             type_it("your backpack.")
             border()
             inventory.append("Apple")
-            heal()
+            eat()
             got_apple = True
 
 #Takes enemy's health when it is the player's turn.
@@ -121,40 +148,39 @@ def user_attack():
     if damage == "m":
         type_it("Miss! Your foe lost no HP!")
         
-def user_magic_attack():
+def gain_confidence():
+    global confidence
+    c_num = random.choice("ooooooott")
+    if confidence == 9:
+        c_num = "o"
+    if confidence <= 10:
+        if c_num == "o":
+            confidence += 1
+        if c_num == "t":
+            confidence += 2
+    if confidence > 10:
+        confidence = 10
+    
+def destroy():
     global enemy_hp
-    global stock
-    damage = random.choice("nnnnnnnmmnnnnnnnnmmnnnnnnnnmnmnnnnnnnmnmnnnnnnnncc")
-    if stock == 1:
-        damage_num = random.randint(10, 20)
-    if stock == 2:
-        damage_num = random.randint(20, 30)
-    if stock == 3:
-        damage_num = random.randint(40, 50)
-    if stock == 4:
-        damage_num = random.randint(70, 90)
-    if stock == 5:
-        damage_num = random.randint(100, 150)
-    if damage == "n":
+    global confidence
+    damage = random.randint(1, 10)
+    damage_num = random.randint(100, 120)
+    c_num = random.randint(5, 10)
+    print_d("A swing and a")
+    print_e("...")
+    if damage == 1:
+        type_it("Miss!")
+        confidence -= c_num
+        print_s("Your confidence went down")
+        type_it("to " + str(confidence))
+    else:
+        type_it("Hit!")
         enemy_hp -= damage_num
-        type_it("Whabam! Your foe lost " + str(damage_num) + " HP!")
-        stock = 0
-        type_it("Your stock went back to 0")
-    if damage == "m":
-        type_it("Whif! Miss! Your foe lost no HP!")
-        stock = 0
-        type_it("Your stock went back to 0")
-    if damage == "c":
-        critical = random.randint(2, 3)
-        total_damage = damage_num * critical
-        if stock == 5:
-            enemy_hp -= 999
-            print_s("Magic out of control! Your foe")
-            type_it("lost 999 HP!")
-        else:
-            enemy_hp -= total_damage
-            print_s("Magic out of control! Your foe")
-            type_it("lost " + str(total_damage) + " HP!")
+        confidence -= c_num
+        type_it("Your foe lost " + str(damage_num) + " HP!")
+        print_s("Your confidence went down")
+        type_it("to " + str(confidence))
         
 #Takes player's health when it is the enemy's turn.
 def enemy_attack():
@@ -173,16 +199,18 @@ def enemy_attack():
         type_it("Miss! You lost no HP!")
 
 def status():
-    border()
-    print("Your Health: " + str(user_hp))
+    sleep(0.2)
+    new_menu()
+    print("===========================")
+    print("Your Health: " + str(user_hp) + " / " + str(max_hp))
     wait()
-    print("Enemy Health: " + str(enemy_hp))
+    print("Enemy Health: " + str(enemy_hp) + " / " + str(enemy_max))
     wait()
     print("Inventory: " + str(inventory))
     wait()
-    if stock >= 1:
-        print("Magic Power: " + str(stock) + "X")
-        wait()
+    print("Confidence: " + str(confidence))
+    wait()
+    print("[Fight] [Eat] [Heal] [Destroy]")
 
 def restart_game():
     global difficulty
@@ -211,62 +239,103 @@ def restart_game():
         type_it("Error 5, please contact support if you believe this is a mistake.")
     type_it("Redirecting to Main Menu...")
     new_menu()
-
-def magic_tutorial():
+    
+def tutorial():
+    new_menu()
+    wait_time = 0.5
+    txt_speed = 0.05
     border()
-    type_it("Wait one second!")
-    print_s("I have something important") 
-    type_it("to tell you!")
-    print_s("There is actually more to")
-    print_s("this fight than just fighting")
-    type_it("and healing.")
-    print_s("Now, you know that 'fight'")
-    print_s("deals damage to the enemy,")
-    type_it("and 'heal' gives you more health.")
-    print_s("However, there are two more")
-    type_it("actions you can do.")
-    type_it("One of them is 'store'.")
-    print_s("By typing 'store' or 's', you")
-    type_it("can sacrifice a turn.")
-    print_s("Now, why would you sacrifice a")
-    type_it("turn?")
-    print_s("Well, that's where the magic")
-    type_it("attack comes in.")
-    print_s("Depending on how many turns you")
-    print_s("sacrifice, your magic attack will")
-    print_s("do more damage. To unleash your")
-    type_it("magic attack, type 'magic' or 'm'.")
-    print_s("However! Be Warned! Your attack")
-    type_it("has a small chance of missing!")
-    print_s("And then all of those turns will")
-    type_it("go to waste! So be smart about it.")
-    type_it("I believe in you, hero.")
+    type_it("Welcome to the game new player!")
+    print_s("My name is Tutor and I will help")
+    type_it("you learn how to play!")
+    type_it("(^U^)")
+    sleep(1)
+    border()
+    print_s("To start this off, a fighting")
+    print_s("game wouldn't be much if you")
+    print_s("couldn't fight, which is why")
+    print_s("you can type 'fight' or 'f' to")
+    type_it("deal some damage to your foe.")
+    border()
+    print_s("After fighting for a while,")
+    type_it("you will take some damage.")
+    print_s("Fortunately there are two")
+    type_it("ways to heal yourself!")
+    print_s("At the beginning of every")
+    print_s("fight you will start with 2")
+    type_it("apples.")
+    print_s("Eating one will increase your HP")
+    type_it("by 30.")
+    type_it("To eat one, type 'eat'.")
+    sleep(1)
+    border()
+    print_s("When you 'fight', you build")
+    type_it("confidence.")
+    print_s("Confidence can be used to give")
+    type_it("you an edge in battle.")
+    sleep(1)
+    border()
+    print_s("Using 5 confidence, you can heal")
+    type_it("yourself 40 HP!")
+    type_it("Give or take.")
+    type_it("Sorta.")
+    type_it("Maybe.")
+    type_it("(O_O)")
+    sleep(1)
+    border()
+    type_it("Anyway...")
+    print_s("If you use 10 confidence, you will")
+    type_it("unleash a super strong attack!")
+    print_s("However, when you use any of these")
+    print_s("actions, your confidence will go")
+    type_it("down a lot.")
+    type_it("Including if you miss a super attack!")
+    print_s("That's right, you can indeed miss a")
+    type_it("super attack, so be careful!")
+    print_s("To heal, type 'heal' and to unleash")
+    print_s("the fury of a thousand stars, type")
+    type_it("'destroy'.")
+    sleep(1)
+    border()
+    print_s("Oh, and you can quit the game at any")
+    type_it("time by typing 'quit' or 'q'.")
+    sleep(1)
+    border()
+    print_s("As a matter of fact, you can type")
+    print_s("the first letter of any action to")
+    type_it("use it!")
+    print_s("So you could type 'h' instead of")
+    print_s("'heal' to heal, 'd' instead of")
+    print_s("'destroy' to unleash your strong")
+    type_it("attack, ect.")
+    type_it("(>oI)")
+    sleep(1)
+    border()
+    print_s("Whew, that was long-winded, sorry")
+    type_it("about that.")
+    type_it("(^o^)`")
+    print_s("To give a recap, 'fight' deals damage")
+    print_s("and builds confidence,")
+    print_s("'eat' uses an apple to heal you,")
+    print_s("'heal' uses 5 confidence to heal you,")
+    print_s("and 'destroy' uses 10 confidence to")
+    type_it("deal a lot of damage.")
+    type_it("Understand?")
+    border()
+    user_input = input(">")
+    border()
+    type_it("Good! Now get ready to...")
+    type_it("Fight!")
+    wait_time = 0.4
+    txt_speed = 0.04
 
 def main_menu(user_input):
     global game_start
     while True:
+        new_menu()
         if user_input.lower() == "play" or user_input.lower() == "p":
             new_menu()
             game_start = True
-            break
-        if user_input.lower() == "tutorial" or user_input.lower() == "t":
-            print("===========================")
-            type_it("          Tutorial         ")
-            print_s("The goal of the game is to")
-            print_s("beat the enemy. To do so,")
-            print_s("type in 'f' or 'fight' to") 
-            print_s("do some damage. If you want")
-            print_s("to get some health back, type")
-            print_s("'h' or 'heal' and you will")
-            print_s("comsume one of the apples in")
-            print_s("your inventory for some health.")
-            print_s("If you want to quit the game,")
-            print_s("type 'quit' or 'q' to exit")
-            print_s("the game. Keep using these")
-            print_s("commands and try to win!")
-            print_s("Good Luck! (Press enter to")
-            type_it("return to the main menu)")
-            user_input = input(">")
             break
         if user_input.lower() == "difficulty" or user_input.lower() == "d":
             global difficulty
@@ -323,26 +392,7 @@ def main_menu(user_input):
                     type_it("Redirecting to Main Menu...")
                     wait()
                     break
-        '''if user_input.lower() == "settings" or user_input.lower() == "s":
-            global fast_mode
-            print("===========================")
-            type_it("         Settings          ")
-            print_s("Type in a code into the")
-            print_s("prompt, you get codes")
-            type_it("throughout the game.")
-            user_input = input(">")
-            if user_input == "7474":
-                if not fast_mode:
-                    fast_mode = True
-                    type_it("Fast Mode: On")
-                else:
-                    fast_mode = False
-                    type_it("Fast Mode: Off")
-                break
-            #if user_input == "4747":'''
-                
-            
-        
+            new_menu()
         if user_input.lower() == "credit" or user_input.lower() == "c":
             print("===========================")
             type_it("          Credits          ")
@@ -354,6 +404,7 @@ def main_menu(user_input):
             print_s("(Press enter to return")
             print_s("to the main menu)")
             user_input = input(">")
+            new_menu()
             break
         if user_input.lower() == "quit" or user_input.lower() == "q":
             print("===========================")
@@ -363,19 +414,25 @@ def main_menu(user_input):
             print_s("screen. (Press enter to")
             print_s("return to the main menu)")
             user_input = input(">")
+            new_menu()
             break
         else:
             type_it("Unknown Command. Try Again.")
+            new_menu()
             print("===========================")
-            print("     Welcome to Fight!     ")
-            print("[-----------Play----------]")
-            print("[---------Tutorial--------]")
-            print("[--------Difficulty-------]")
-            #print("[---------Settings--------]")
-            print("[----------Credit---------]")
-            print("[-----------Quit----------]")
+            print("   Welcome to Fight! (1.2) ")
+            print("")
+            print("        [   Play   ]       ")
+            print("")
+            print("        [Difficulty]       ")
+            print("")
+            print("        [  Credit  ]       ")
+            print("")
+            print("        [   Quit   ]       ")
+            print("")
             print("===========================")
             user_input = input(">")
+            new_menu()
 
 #The beginning of the game starts with this line of code below.
 in_menu = True
@@ -392,51 +449,66 @@ while True:
         if game_start:
             break
         print("===========================")
-        print("     Welcome to Fight!     ")
-        print("[-----------Play----------]")
-        print("[---------Tutorial--------]")
-        print("[--------Difficulty-------]")
-        #print("[---------Settings--------]")
-        print("[----------Credit---------]")
-        print("[-----------Quit----------]")
+        print("   Welcome to Fight! (1.2) ")
+        print("")
+        print("        [   Play   ]       ")
+        print("")
+        print("        [Difficulty]       ")
+        print("")
+        print("        [  Credit  ]       ")
+        print("")
+        print("        [   Quit   ]       ")
+        print("")
         print("===========================")
         user_input = input(">")
         main_menu(user_input)
+    while True:
+        type_it("Have you played Fight! before? (Y/N)")
+        user_input = input(">")
+        if user_input.lower == "yes" or user_input.lower() == "y":
+            type_it("Then don't let me keep you,")
+            type_it("Onward! To battle!")
+            break
+        elif user_input.lower() == "no" or user_input.lower() == "n":
+            tutorial()
+            break
+        else:
+            type_it("Sorry, I didn't understand that.")
+            print("")
+    new_menu()
     #Runs the game in a loop until a win or loss is detected.
+    enemy_max = enemy_hp
     while not game_over:
-        if not tutorial_done and (enemy_hp <= 450 and enemy_hp >= 400):
-            magic_tutorial()
-            tutorial_done = True
         enemy_turn = False
         status()
         user_input = input(">")
+        border()
         if user_input.lower() == "fight" or user_input.lower() == "f":
             user_attack()
+            gain_confidence()
             if check_win(user_hp, enemy_hp):
                 break
             enemy_turn = True
-        elif user_input.lower() == "heal" or user_input.lower() == "h":
-            heal()
+        elif user_input.lower() == "eat" or user_input.lower() == "e":
+            eat()
             enemy_turn = True
+        elif user_input.lower() == "heal" or user_input.lower() == "h":
+            if confidence >= 5:
+                heal()
+                enemy_turn = True
+            else:
+                type_it("You need more confidence!")
+        elif user_input.lower() == "destroy" or user_input.lower() == "d":
+            if confidence >= 10:
+                destroy()
+                enemy_turn = True
+            else:
+                type_it("You need more confidence!")
         elif user_input.lower() == " " or user_input.lower() == "":
             type_it("Type your command next to the >")
-        elif user_input.lower() == "store" or user_input.lower() == "s":
-            if stock < 5:
-                stock += 1
-                type_it("You now have " + str(stock) + " MP")
-                enemy_turn = True
-            else:
-                type_it("You cannot stock up more than 5!")
-        elif user_input.lower() == "magic" or user_input.lower() == "m":
-            if stock > 0:
-                user_magic_attack()
-                enemy_turn = True
-                if check_win(user_hp, enemy_hp):
-                    break
-            else:
-                type_it("You have to store turns first!")
         elif user_input.lower() == "quit" or user_input.lower() == "q":
-            type_it("Are you sure you want to quit? (Y/N)")
+            type_it("Are you sure you want to quit?")
+            type_it("You will lose the fight! (Y/N)")
             user_input = input(">")
             if user_input.lower() == "yes" or user_input.lower() == "y":
                 break
@@ -487,7 +559,8 @@ while True:
         voice("Hero! Do not give up!")
         voice("This is not the end")
         voice("of your adventure.")
-        voice("Stay Determined.")
+        voice("You can do it!")
+        voice("Stay Confident!")
     border()
     undecisive = True
     while undecisive:
@@ -498,7 +571,7 @@ while True:
             user_hp = 100
             enemy_hp = 200
             difficulty = "Normal"
-            inventory = ["Apple", "Apple", "Apple"]
+            inventory = ["Apple", "Apple"]
             type_it("Difficulty set to Normal")
             type_it("Redirecting to Main Menu...")
             new_menu()
