@@ -1,5 +1,8 @@
+#!/usr/bin/env python
 from time import sleep
+import os
 import random
+import sys
 
 inventory = ["Apple", "Apple"]
 user_hp = 100         #Default value is 100
@@ -7,8 +10,8 @@ max_hp = user_hp      #Default value is user_hp
 enemy_hp = 200        #Default value is 200
 game_start = False    #Default value is False
 game_over = False     #Default value is False
-wait_time = 0.5       #Default value is 0.4
-txt_speed = 0.05      #Default value is 0.04
+wait_time = 0.4       #Default value is 0.4
+txt_speed = 0.04      #Default value is 0.04
 difficulty = "Normal" #Default value is "Normal"
 fast_mode = False     #Default value is False
 confidence = 0        #Default value is 0
@@ -29,34 +32,33 @@ def border():
     print("---------------------------")
     wait()
 
-def new_menu():
-    for i in range(60):
-        print("")
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
     
 #Slowly types the words to make it look smoother and let the
 #reader read the text slower.
-def type_it(str):
-    for letter in str:
+def type_it(txt):
+    for letter in txt:
         print(letter, end='', flush = True)
         sleep(txt_speed)
     print("")
     wait() 
-def print_s(str):
-    for letter in str:
+def print_s(txt):
+    for letter in txt:
         print(letter, end='', flush = True)
         sleep(txt_speed)
     print("")
-def print_d(str):
-    for letter in str:
+def print_d(txt):
+    for letter in txt:
         print(letter, end='', flush = True)
         sleep(txt_speed)
-def print_e(str):
-    for letter in str:
+def print_e(txt):
+    for letter in txt:
         print(letter, end='', flush = True)
         sleep(0.8)
     print("")
-def voice(str):
-    for letter in str:
+def voice(txt):
+    for letter in txt:
         print(letter, end='', flush = True)
         sleep(0.1)
     print("")
@@ -200,7 +202,7 @@ def enemy_attack():
 
 def status():
     sleep(0.2)
-    new_menu()
+    clear_screen()
     print("===========================")
     print("Your Health: " + str(user_hp) + " / " + str(max_hp))
     wait()
@@ -210,7 +212,9 @@ def status():
     wait()
     print("Confidence: " + str(confidence))
     wait()
+    border()
     print("[Fight] [Eat] [Heal] [Destroy]")
+    print("===========================")
 
 def restart_game():
     global difficulty
@@ -227,23 +231,16 @@ def restart_game():
         max_hp = 100
         enemy_hp = 200
         inventory = ["Apple", "Apple", "Apple"]
-    elif difficulty == "Hard":
+    else: #difficutly == "Hard":
         user_hp = 250
         max_hp = 250
         enemy_hp = 500
         inventory = ["Apple", "Apple", "Apple"]
-    else:
-        type_it("What the? Invalid Difficulty?")
-        type_it("Not on my watch.")
-        sleep(3)
-        type_it("Error 5, please contact support if you believe this is a mistake.")
     type_it("Redirecting to Main Menu...")
-    new_menu()
+    clear_screen()
     
 def tutorial():
-    new_menu()
-    wait_time = 0.5
-    txt_speed = 0.05
+    clear_screen()
     border()
     type_it("Welcome to the game new player!")
     print_s("My name is Tutor and I will help")
@@ -308,12 +305,9 @@ def tutorial():
     print_s("'heal' to heal, 'd' instead of")
     print_s("'destroy' to unleash your strong")
     type_it("attack, ect.")
-    type_it("(>oI)")
+    type_it("(>oO)")
     sleep(1)
     border()
-    print_s("Whew, that was long-winded, sorry")
-    type_it("about that.")
-    type_it("(^o^)`")
     print_s("To give a recap, 'fight' deals damage")
     print_s("and builds confidence,")
     print_s("'eat' uses an apple to heal you,")
@@ -326,15 +320,13 @@ def tutorial():
     border()
     type_it("Good! Now get ready to...")
     type_it("Fight!")
-    wait_time = 0.4
-    txt_speed = 0.04
 
 def main_menu(user_input):
     global game_start
     while True:
-        new_menu()
+        clear_screen()
         if user_input.lower() == "play" or user_input.lower() == "p":
-            new_menu()
+            clear_screen()
             game_start = True
             break
         if user_input.lower() == "difficulty" or user_input.lower() == "d":
@@ -343,22 +335,24 @@ def main_menu(user_input):
             global max_hp
             global enemy_hp
             print("===========================")
-            type_it("         Difficulty        ")
-            print_s("Select your difficulty by")
-            print_s("typing it into the prompt.")
-            print_s("Easy: An easier experience")
-            print_s("for players that are new")
-            type_it("to this game.")
-            print_s("Normal: The original gameplay")
-            print_s("difficulty that the creator")
-            type_it("intended the game to have.")
+            print("         Difficulty        ")
+            print("Select your difficulty by")
+            print("typing it into the prompt.")
+            print("Easy: An easier experience")
+            print("for players that are new")
+            print("to this game.")
+            print("Normal: The original gameplay")
+            print("difficulty that the creator")
+            print("intended the game to have.")
             if hard_unlocked:
-                print_s("Hard: For more experienced")
-                print_s("players. This difficulty")
-                print_s("requires a little skill, and")
-                type_it("a lot of luck.")
-            type_it("Current difficulty set to")
-            type_it(str(difficulty))
+                print("Hard: For more experienced")
+                print("players. This difficulty")
+                print("requires a lot of skill, and")
+                print("a little of luck.")
+            border()
+            print("Current difficulty set to")
+            print(str(difficulty))
+            print("===========================")
             user_difficulty_input = input(">")
             if user_difficulty_input.lower() == "easy" or user_difficulty_input.lower() == "e":
                 global inventory
@@ -370,6 +364,7 @@ def main_menu(user_input):
                 type_it("Difficulty set to " + str(difficulty))
                 type_it("Redirecting to Main Menu")
                 wait()
+                clear_screen()
                 break
             if user_difficulty_input.lower() == "normal" or user_difficulty_input.lower() == "n":
                 #global inventory
@@ -381,6 +376,7 @@ def main_menu(user_input):
                 type_it("Difficulty set to " + str(difficulty))
                 type_it("Redirecting to Main Menu")
                 wait()
+                clear_screen()
                 break
             if hard_unlocked:
                 if user_difficulty_input.lower() == "hard" or user_difficulty_input.lower() == "h":
@@ -391,36 +387,28 @@ def main_menu(user_input):
                     type_it("Difficulty set to " + str(difficulty))
                     type_it("Redirecting to Main Menu...")
                     wait()
+                    clear_screen()
                     break
-            new_menu()
+            clear_screen()
         if user_input.lower() == "credit" or user_input.lower() == "c":
             print("===========================")
             type_it("          Credits          ")
             type_it("Game made by Austin LaMarche")
             type_it("With help from Veerien Pala")
-            print_s("And thank you to Mr. Raser")
-            type_it("for teaching me Python 3")
-            type_it("And thank YOU for playing")
+            type_it("Thank you for playing")
             print_s("(Press enter to return")
             print_s("to the main menu)")
             user_input = input(">")
-            new_menu()
+            clear_screen()
             break
         if user_input.lower() == "quit" or user_input.lower() == "q":
-            print("===========================")
-            print_s("If you wish to quit the game,") 
-            print_s("simply click the red stop")
-            print_s("button at the top of this")
-            print_s("screen. (Press enter to")
-            print_s("return to the main menu)")
-            user_input = input(">")
-            new_menu()
-            break
+            type_it("Thank you for playing!");
+            sys.exit()
         else:
             type_it("Unknown Command. Try Again.")
-            new_menu()
+            clear_screen()
             print("===========================")
-            print("   Welcome to Fight! (1.2) ")
+            print("   Welcome to Fight! (1.4) ")
             print("")
             print("        [   Play   ]       ")
             print("")
@@ -432,24 +420,22 @@ def main_menu(user_input):
             print("")
             print("===========================")
             user_input = input(">")
-            new_menu()
+            clear_screen()
 
 #The beginning of the game starts with this line of code below.
 in_menu = True
-new_menu()
-print("Note: To select an option on")
-print("the menu, type it in to the")
-print("command prompt. Example: type")
-print("in 'play' or 'p' to select the")
-print("play option. Another Note: DO")
-print("NOT TYPE WHEN THE PROGRAM IS")
-print("TYPING! Thanks.")
+clear_screen()
+print("To select an option on the menu,")
+print("type it in to the command prompt.")
+print("i.e. type 'play' or 'p' to play.")
+print("Note: Don't type when the program")
+print("is typing, thanks!")
 while True:
     while in_menu:
         if game_start:
             break
         print("===========================")
-        print("   Welcome to Fight! (1.3) ")
+        print("   Welcome to Fight! (1.4) ")
         print("")
         print("        [   Play   ]       ")
         print("")
@@ -465,7 +451,7 @@ while True:
     while True:
         type_it("Have you played Fight! before? (Y/N)")
         user_input = input(">")
-        if user_input.lower == "yes" or user_input.lower() == "y":
+        if user_input.lower() == "yes" or user_input.lower() == "y":
             type_it("Then don't let me keep you,")
             type_it("Onward! To battle!")
             break
@@ -475,7 +461,7 @@ while True:
         else:
             type_it("Sorry, I didn't understand that.")
             print("")
-    new_menu()
+    clear_screen()
     #Runs the game in a loop until a win or loss is detected.
     enemy_max = enemy_hp
     while not game_over:
@@ -512,8 +498,6 @@ while True:
             user_input = input(">")
             if user_input.lower() == "yes" or user_input.lower() == "y":
                 break
-            else:
-                type_it("Ok, let's continue")
         else:
             type_it("Invalid Command. Try Again.")
         if check_win(user_hp, enemy_hp):
@@ -574,5 +558,5 @@ while True:
             inventory = ["Apple", "Apple"]
             type_it("Difficulty set to Normal")
             type_it("Redirecting to Main Menu...")
-            new_menu()
+            clear_screen()
             continue
